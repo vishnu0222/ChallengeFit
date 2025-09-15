@@ -12,15 +12,16 @@ A production-style backend for managing users, fitness challenges, and structure
 * *(Optional)* file upload for challenge image (`image` field, multipart)
   
 ## Architecture Overview
+### High-Level Request Flow
 <img width="3840" height="402" alt="Untitled diagram _ Mermaid Chart-2025-09-07-001354" src="https://github.com/user-attachments/assets/30098f29-7626-4b67-9c70-1d45ac840467" />
-<img width="3840" height="1524" alt="Untitled diagram _ Mermaid Chart-2025-09-07-001044" src="https://github.com/user-attachments/assets/57131c28-e899-4046-9d28-de85c3f62014" />
 
-## Modules & Responsibilities
+### Module Architecture & Responsibilities
 * Auth: Sign-up, sign-in (argon2 hashing, JWT issuance)
 * User: Profile read/update, challenge lists for a user
 * Challenge: Create/update/delete, join/leave, list views (active/upcoming/completed)
 * Workout: Workout plans, splits, and exercises (in distinct controllers/services)
 * Prisma: Centralized DB client provider
+<img width="3840" height="1524" alt="Untitled diagram _ Mermaid Chart-2025-09-07-001044" src="https://github.com/user-attachments/assets/57131c28-e899-4046-9d28-de85c3f62014" />
   
 ## Data Model (Prisma)
 <img width="1050" height="1900" alt="Untitled diagram _ Mermaid Chart-2025-09-07-001146" src="https://github.com/user-attachments/assets/51c74a4d-bbef-4e41-8949-d2877e70f898" />
