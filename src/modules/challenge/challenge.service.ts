@@ -69,7 +69,7 @@ export class ChallengeService {
                 where : {id : challengeId},
                 data : {
                     ...updateChallengeDto,
-                    image : file? file.filename : '',
+                    image : file? file.filename : challenge.image,
                 }
             })
             return { message: 'Challenge updated successfully', challenge: updatedChallenge };
@@ -205,7 +205,6 @@ export class ChallengeService {
                 }
             }
         })
-        console.log(participants);
         return { message: 'Participants retrieved successfully', participants };    
     }
     async getParticipations(userId : number){

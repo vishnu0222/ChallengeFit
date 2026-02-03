@@ -1,5 +1,5 @@
 import { ArrayMinSize, IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
-import { ExerciseDto } from "./exercises.dto";
+import { ExerciseDto } from "../exercises/exercises.dto";
 
 export class CreateWorkoutSplitDto{
     @IsNotEmpty()

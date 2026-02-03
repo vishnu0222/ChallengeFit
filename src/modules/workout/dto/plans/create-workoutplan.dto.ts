@@ -1,10 +1,10 @@
 import { ArrayMinSize, IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
-import { CreateWorkoutSplitDto } from "./create-workout-split.dto";
+import { CreateWorkoutSplitDto } from "../splits/create-workout-split.dto";
 
 export class CreateWorkoutPlanDto {
 
     @IsNotEmpty()
-    @IsString()
+    @IsString({message: 'Title must be a '})
     title: string
     
     @IsOptional()
