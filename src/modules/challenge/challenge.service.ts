@@ -229,7 +229,6 @@ export class ChallengeService {
                 }
             }
         })
-        console.log(participations);
         return {message : "Retrived all participations",participations}
     }
     async updateParticipation(challengeId : number, participantId : number, updateParticipationDto : updateParticipationDto) {

@@ -26,6 +26,31 @@ A production-style backend for managing users, fitness challenges, and structure
 ## Data Model (Prisma)
 <img width="1050" height="1900" alt="Untitled diagram _ Mermaid Chart-2025-09-07-001146" src="https://github.com/user-attachments/assets/51c74a4d-bbef-4e41-8949-d2877e70f898" />
 
+## 🤖 AI Fitness Assistant
+
+ChallengeFit includes an AI assistant that uses **OpenAI server-side** with **tool calling** to ground responses in real app data (workout plans, splits/exercises, and challenge participation).
+
+### How it works (high level)
+
+1. Client sends a chat message to the API (**JWT required**).
+2. The model can request backend “tools” such as:
+   - list a user’s workout plans
+   - fetch a workout plan by id
+   - list challenges the user has joined
+3. The backend executes those tool calls via existing services (**Prisma + PostgreSQL**) and returns results to the model.
+4. The model generates the final response using the fetched data.
+
+> **Note:** The model does **not** access the database directly. It only sees the data that backend returns from tool calls.
+
+### Example request (API-only chat)
+
+```bash
+curl -X POST http://localhost:3000/chat \
+  -H "Authorization: Bearer <JWT>" \
+  -H "Content-Type: application/json" \
+  -d '{"What do you think about my LegDay Workout split"}'
+
+
 ## 🚀 Quickstart
 
 ### 1) Prerequisites
