@@ -1,15 +1,17 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { createChallengeDto } from './dto/create-challenge.dto';
 import { last } from 'rxjs';
 import { PaginationDto } from 'src/common/pagination/pagination.dto';
 import { updateChallengeDto } from './dto/update-challenge.dto';
 import { updateParticipationDto } from './dto/update-participation.dto';
+import { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 
 @Injectable()
 export class ChallengeService {
-    constructor(private prismaService : PrismaService) {}
+    constructor(private prismaService : PrismaService, @Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
     async createChallenge(userId : number, createChallengeDto : createChallengeDto, file : Express.Multer.File) {
         try {
@@ -27,17 +29,28 @@ export class ChallengeService {
     }
 
     async getChallengeById(challengeId : number) {
+        const cacheKey = `challenge:${challengeId}`;
+        const cachedChallenge = await this.cacheManager.get(cacheKey);
+        if (cachedChallenge) {
+          return { message: 'Challenge retrieved successfully (from cache)', challenge: cachedChallenge };
+        }
         const challenge = await this.prismaService.challenge.findUnique({
             where : {
                 id :challengeId
             }
         })
+        await this.cacheManager.set(cacheKey, challenge, 120*1000); // Cache for 120 seconds
         return { message: 'Challenge retrieved successfully', challenge : challenge };
     }
 
     async getAllChallenges(paginationDto: PaginationDto): Promise<any> {
         const skip = (paginationDto.page-1) * paginationDto.limit;
         const take = paginationDto.limit;
+        const cacheKey = `challenges:${paginationDto.page}_limit_${paginationDto.limit}`;
+        const cachedChallenges = await this.cacheManager.get(cacheKey);
+        if (cachedChallenges) {
+          return { message: 'Challenges retrieved successfully (from cache)', challenges: cachedChallenges };
+        }
         const allChallenges = await this.prismaService.challenge.findMany({
             skip,
             take,
@@ -51,6 +64,7 @@ export class ChallengeService {
             },
           },
         });
+        await this.cacheManager.set(cacheKey, allChallenges, 60000); // Cache for 60 seconds
         return allChallenges;
       }
 
@@ -173,6 +187,11 @@ export class ChallengeService {
     async getParticipants(challengeId : number, paginationDto : PaginationDto) {
         const skip = (paginationDto.page-1) * paginationDto.limit;
         const take = paginationDto.limit;
+        const cacheKey = `challenge:${challengeId}:participants_page_${paginationDto.page}_limit_${paginationDto.limit}`;
+        const cachedParticipants = await this.cacheManager.get(cacheKey);
+        if (cachedParticipants) {
+          return { message: 'Participants retrieved successfully (from cache)', participants: cachedParticipants };
+        }
         const challenge = await this.prismaService.challenge.findUnique({
             where : {
                 id : challengeId,
@@ -205,6 +224,7 @@ export class ChallengeService {
                 }
             }
         })
+        await this.cacheManager.set(cacheKey, participants, 60000); // Cache for 60 seconds
         return { message: 'Participants retrieved successfully', participants };    
     }
     async getParticipations(userId : number){
@@ -259,6 +279,11 @@ export class ChallengeService {
     
     async getActiveChallenges() {
         const now = new Date();
+        const cacheKey = 'active_challenges';
+        const cachedActiveChallenges = await this.cacheManager.get(cacheKey);
+        if (cachedActiveChallenges) {
+          return { message: 'Active challenges retrieved successfully (from cache)', activeParticipants: cachedActiveChallenges };
+        }
         const activeParticipants = await this.prismaService.challenge.findMany({
             where : {
                 startDate  : {lte : now},
@@ -276,6 +301,7 @@ export class ChallengeService {
         if(activeParticipants.length === 0) {
             throw new BadRequestException('No active challenges found');
         }
+        await this.cacheManager.set(cacheKey, activeParticipants, 45*1000); // Cache for 45 seconds
         return { message: 'Active challenges retrieved successfully', activeParticipants };
     }
 }

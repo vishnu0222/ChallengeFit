@@ -7,6 +7,7 @@ import { PaginationDto } from 'src/common/pagination/pagination.dto';
 import { updateChallengeDto } from './dto/update-challenge.dto';
 import { User } from 'generated/prisma';
 import { updateParticipationDto } from './dto/update-participation.dto';
+import { Throttle } from '@nestjs/throttler';
 
 @UseGuards(JwtGuard)
 @Controller('challenge')
